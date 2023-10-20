@@ -45,6 +45,8 @@ class BookTest extends TestCase
             "read_page" => 9
         ])
             ->assertStatus(201);
+
+        $this->assertNotNull(Book::where('name', 'test')->first());
     }
 
     public function testPostBookValidationFailed()
@@ -116,6 +118,8 @@ class BookTest extends TestCase
             ->assertJson([
                 'message' => 'success deleted'
             ]);
+
+        $this->assertNull(Book::find($book->id));
     }
 
     public function testDeleteBookErrorNotFound()
