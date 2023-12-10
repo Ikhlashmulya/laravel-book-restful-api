@@ -21,4 +21,15 @@ use Illuminate\Support\Facades\Route;
 //     return $request->user();
 // });
 
-Route::resource("book", BookController::class)->only(["index", "show", "store", "update", "destroy"]);
+
+Route::post("/users", [UserController::class, "register"]);
+Route::post("/users/_login", [UserController::class, "login"]);
+
+Route::middleware("jwt.verified")->group(function () {
+    Route::get("/users/_current", [UserController::class, "current"]);
+    Route::patch("/users/_current", [UserController::class, "update"]);
+    Route::resource("books", BookController::class)->only(["store", "update", "destroy"]);
+});
+
+Route::resource("books", BookController::class)
+    ->only(["index", "show"]);
