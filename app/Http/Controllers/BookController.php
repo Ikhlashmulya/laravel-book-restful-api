@@ -4,20 +4,25 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreBookRequest;
 use App\Http\Requests\UpdateBookRequest;
+use App\Http\Resources\BookCollection;
 use App\Http\Resources\BookResource;
 use App\Models\Book;
-use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Http\Request;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class BookController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $books = Book::all();
+        $page = $request->query('page', 1);
+        $size = $request->query('size', 5);
 
-        return BookResource::collection($books);
+        $books = Book::paginate(page: $page, perPage: $size);
+
+        return new BookCollection($books);
     }
 
     /**
@@ -42,9 +47,7 @@ class BookController extends Controller
         $book = Book::find($id);
 
         if (!$book) {
-            throw new HttpResponseException(response([
-                "errors" => "Book not found"
-            ], 404));
+            throw new HttpException(404, "Book not found");
         }
 
         return new BookResource($book);
@@ -58,9 +61,7 @@ class BookController extends Controller
         $book = Book::find($id);
 
         if (!$book) {
-            throw new HttpResponseException(response([
-                "errors" => "Book not found"
-            ], 404));
+            throw new HttpException(404, "Book not found");
         }
 
         $validated = $request->validated();
@@ -78,15 +79,15 @@ class BookController extends Controller
         $book = Book::find($id);
 
         if (!$book) {
-            throw new HttpResponseException(response([
-                "errors" => "Book not found"
-            ], 404));
+            throw new HttpException(404, "Book not found");
         }
 
         $book->delete();
 
         return response()->json([
-            "message" => "success deleted"
+            "data" => [
+                "message" => "success deleted"
+            ]
         ]);
     }
 }
